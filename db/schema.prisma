@@ -2,7 +2,7 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgres"
   url      = env("DATABASE_URL")
 }
 
@@ -19,10 +19,11 @@ model User {
   name           String?
   email          String   @unique
   hashedPassword String?
-  role           String   @default("USER")
+  role           Role     @default(USER)
 
   tokens   Token[]
   sessions Session[]
+  Post     Post[]
 }
 
 model Session {
@@ -63,3 +64,37 @@ model Token {
 // enum TokenType {
 //   RESET_PASSWORD
 // }
+
+model Question {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  text      String
+  choices   Choice[]
+}
+
+model Choice {
+  id         Int      @id @default(autoincrement())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  text       String
+  votes      Int      @default(0)
+  question   Question @relation(fields: [questionId], references: [id])
+  questionId Int
+}
+
+model Post {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  title     String   @db.VarChar(255)
+  text      String
+  author    User?    @relation(fields: [authorId], references: [id])
+  authorId  Int?
+  username  String
+}
+
+enum Role {
+  USER
+  ADMIN
+}
